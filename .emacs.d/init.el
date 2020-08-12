@@ -271,3 +271,23 @@ the beginning of the line and the end of the line."
 (defun current-core ()
   (interactive)
   (produce-core (buffer-file-name) "ghc" "-dsuppress-all -O2"))
+
+;; ===================================================================
+;; Sync dotfiles
+(defun dotfile-sync (fp)
+  (let ((git
+	(concat "git --git-dir=" HOME "/.dotfiles/ --work-tree=" HOME)))
+    (progn
+      (shell-command (concat git " add " fp))
+      (shell-command (concat git " commit -m 'Update " fp "'")))))
+
+(defun dotfiles-sync ()
+  (interactive)
+  (let* ((git
+	  (concat "git --git-dir=" HOME "/.dotfiles/ --work-tree=" HOME))
+	 (tf-cmd (concat git " ls-files" " --modified"))
+	 (tf-string (shell-command-to-string tf-cmd))
+	 (tf-list (split-string tf-string "\n")))
+    (dolist (f tf-list)
+      (unless (= (length f) 0)
+	(dotfile-sync f)))))
