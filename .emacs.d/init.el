@@ -67,6 +67,8 @@
 (defalias 'openo 'find-file-other-window)
 (defalias 'prog 'goto-prog-dir)
 
+(defconst HOME "/home/creed")
+
 (define-key key-translation-map (kbd "C-c x") (kbd "C-x"))
 
 ;; (global-set-key (kbd "C-f") 'forward-word)
