@@ -288,6 +288,8 @@ the beginning of the line and the end of the line."
 	 (tf-cmd (concat git " ls-files" " --modified"))
 	 (tf-string (shell-command-to-string tf-cmd))
 	 (tf-list (split-string tf-string "\n")))
-    (dolist (f tf-list)
-      (unless (= (length f) 0)
-	(dotfile-sync f)))))
+    (progn
+      (dolist (f tf-list)
+	(unless (= (length f) 0)
+	  (dotfile-sync f)))
+      (shell-command (concat git " push")))))
