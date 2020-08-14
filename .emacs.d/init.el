@@ -132,7 +132,9 @@
   (setq ivy-count-format "(%d/%d) "))
 
 (use-package swiper
-  :ensure t)
+  :ensure t
+  :config
+  (global-set-key (kbd "C-s") 'swiper))
 
 (use-package counsel
   :ensure t
@@ -166,7 +168,13 @@
   :config
   (projectile-mode +1)
   (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
-  (setq projectile-completion-system 'ivy))
+  (setq projectile-completion-system 'ivy)
+  (setq projectile-project-search-path '("/mnt/c/Users/mota/Desktop/LinuxWorkStation/Prog/")))
+
+(use-package counsel-projectile
+  :ensure t
+  :config
+  (setq counsel-projectile-mode t))
 
 (use-package org
   :ensure t)
@@ -188,7 +196,7 @@
 
 (windmove-default-keybindings 'meta)
 
-(setq projectile-project-search-path '("/mnt/c/Users/mota/Desktop/LinuxWorkStation/Prog/"))
+
 
 (defun open-my-init-file ()
   "Open the init file."
