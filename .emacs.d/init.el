@@ -6,6 +6,8 @@
 
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 
+(blink-cursor-mode 1)
+
 ;; Package configs
 (require 'package)
 (setq package-enable-at-startup nil)
@@ -15,10 +17,10 @@
 (package-initialize)
 
 ;; Remapping bindings to the max
-(global-set-key (kbd "C-c SPC") 'set-mark-command)
+;(global-set-key (kbd "C-c SPC") 'set-mark-command)
 
-(global-set-key (kbd "C-l") 'delete-backward-char)
-(global-set-key (kbd "M-l") 'backward-kill-word)
+;(global-set-key (kbd "C-l") 'delete-backward-char)
+;(global-set-key (kbd "M-l") 'backward-kill-word)
 
 ;; scroll one line at a time (less "jumpy" than defaults)
 (setq mouse-wheel-scroll-amount '(1 ((shift) . 1))) ;; one line at a time
@@ -98,11 +100,12 @@
 
 ;; Themes START --------------------------------------------
 
-(use-package rebecca-theme :ensure t)
-(use-package dracula-theme :ensure t)
 (use-package srcery-theme :ensure t)
+(use-package gruber-darker-theme :ensure t)
+(use-package zenburn-theme :ensure t)
+(use-package sublime-themes :ensure t)
 
-(load-theme 'srcery t)
+(load-theme 'zenburn t)
 
 ;; Themes END ----------------------------------------------
 
@@ -133,8 +136,7 @@
 
 (use-package swiper
   :ensure t
-  :config
-  (global-set-key (kbd "C-s") 'swiper))
+  :config)
 
 (use-package counsel
   :ensure t
@@ -174,7 +176,7 @@
 (use-package counsel-projectile
   :ensure t
   :config
-  (setq counsel-projectile-mode t))
+  (counsel-projectile-mode 1))
 
 (use-package org
   :ensure t)
@@ -195,8 +197,6 @@
   (global-set-key (kbd "M-RET") 'avy-goto-word-0))
 
 (windmove-default-keybindings 'meta)
-
-
 
 (defun open-my-init-file ()
   "Open the init file."
