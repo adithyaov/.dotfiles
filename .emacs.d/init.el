@@ -7,6 +7,7 @@
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 
 (blink-cursor-mode 1)
+(global-hl-line-mode 1)
 
 ;; Package configs
 (require 'package)
@@ -100,12 +101,34 @@
 
 ;; Themes START --------------------------------------------
 
-(use-package srcery-theme :ensure t)
-(use-package gruber-darker-theme :ensure t)
-(use-package zenburn-theme :ensure t)
-(use-package sublime-themes :ensure t)
+;(use-package srcery-theme :ensure t)
+;(use-package gruber-darker-theme :ensure t)
 
-(load-theme 'zenburn t)
+;(use-package zenburn-theme :ensure t)
+;;(custom-set-faces
+;; '(cursor ((t (:background "#FFFFEF" :foreground "#303030"))))
+;; '(eshell-git-prompt-robyrussell-branch-face ((t (:background nil :foreground "#DE9191"))))
+;; '(eshell-git-prompt-robyrussell-git-face ((t (:background nil :foreground "#9197DE"))))
+;; '(ivy-current-match ((t (:background "#000000" :foreground "#F0DFAF" :underline t :weight bold))))
+;; '(ivy-highlight-face ((t (:background nil :foreground nil))))
+;; '(ivy-minibuffer-match-face-2 ((t (:background "#5F7F5F" :foreground "#F0DFAF"))))
+;; '(ivy-minibuffer-match-face-3 ((t (:background "#7F9F7F" :foreground "#F0DFAF"))))
+;; '(ivy-minibuffer-match-face-4 ((t (:background "#8FB28F" :foreground "#FFFFFF"))))
+;; '(magit-diff-added ((t (:background "#BCFFAD" :foreground "#519F50" :weight light))))
+;; '(magit-diff-added-highlight ((t (:background "#BCFFAD" :foreground "#519F50" :weight bold))))
+;; '(magit-diff-removed ((t (:background "#FFADAD" :foreground "#EF2F27" :weight light))))
+;; '(magit-diff-removed-highlight ((t (:background "#FFADAD" :foreground "#EF2F27" :weight bold)))))
+
+;(use-package sublime-themes :ensure t)
+
+;(use-package leuven-theme
+;  :config
+;  (load-theme 'leuven-dark t))
+
+(use-package flatui-theme
+  :ensure t
+  :config
+  (load-theme 'flatui))
 
 ;; Themes END ----------------------------------------------
 
