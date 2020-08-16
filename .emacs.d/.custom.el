@@ -15,8 +15,8 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(cursor ((t (:background "#FFFFEF" :foreground "#303030"))))
- '(eshell-git-prompt-robyrussell-branch-face ((t (:background "#DE9191" :foreground "white"))))
- '(eshell-git-prompt-robyrussell-git-face ((t (:background "#9197DE" :foreground "white"))))
+ '(eshell-git-prompt-robyrussell-branch-face ((t (:background nil :foreground "#DE9191"))))
+ '(eshell-git-prompt-robyrussell-git-face ((t (:background nil :foreground "#9197DE"))))
  '(ivy-current-match ((t (:background "#000000" :foreground "#F0DFAF" :underline t :weight bold))))
  '(ivy-highlight-face ((t (:background nil :foreground nil))))
  '(ivy-minibuffer-match-face-2 ((t (:background "#5F7F5F" :foreground "#F0DFAF"))))
