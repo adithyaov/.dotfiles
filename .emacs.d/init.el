@@ -75,20 +75,18 @@
 (straight-use-package 'solarized-theme)
 (straight-use-package 'impatient-mode)
 (straight-use-package 'expand-region)
-(straight-use-package 'ivy)
-(straight-use-package 'swiper)
-(straight-use-package 'counsel)
 (straight-use-package 'magit)
 (straight-use-package 'haskell-mode)
 (straight-use-package 'hindent)
 (straight-use-package 'projectile)
-(straight-use-package 'counsel-projectile)
 (straight-use-package 'org)
 (straight-use-package 'multiple-cursors)
 (straight-use-package 'avy)
 (straight-use-package 'hydra)
 (straight-use-package 'rust-mode)
 (straight-use-package 'highlight-function-calls)
+(straight-use-package 'helm)
+(straight-use-package 'helm-projectile)
 
 ;; Hilight text that extends beyond a certain column
 (progn
@@ -131,16 +129,6 @@
   (global-set-key (kbd "C--") 'er/contract-region))
 
 (progn
-  (require 'ivy)
-  (require 'counsel)
-  (require 'swiper)
-  (ivy-mode 1)
-  (setq ivy-use-virtual-buffers t)
-  (setq ivy-count-format "(%d/%d) ")
-  (global-set-key (kbd "C-x C-f") 'counsel-find-file)
-  (global-set-key (kbd "C-c g") 'counsel-git))
-
-(progn
   (require 'magit)
   (global-set-key (kbd "C-x g") 'magit-status))
 
@@ -156,15 +144,19 @@
   (add-hook 'haskell-mode-hook #'hindent-mode))
 
 (progn
+  (require 'helm)
+  (global-set-key (kbd "M-x") #'helm-M-x)
+  (global-set-key (kbd "C-x C-f") #'helm-find-files)
+  (helm-mode 1))
+
+(progn
   (require 'projectile)
-  (require 'ivy)
-  (require 'counsel)
-  (require 'swiper)
-  (require 'counsel-projectile)
+  (require 'helm)
+  (require 'helm-projectile)
   (projectile-mode +1)
-  (counsel-projectile-mode 1)
+  (helm-projectile-on)
   (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
-  (setq projectile-completion-system 'ivy)
+  (setq projectile-completion-system 'helm)
   (setq projectile-project-search-path
 	'("/mnt/c/Users/mota/Desktop/LinuxWorkStation/Prog/")))
 
