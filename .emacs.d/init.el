@@ -115,11 +115,13 @@
 (progn
   (require 'impatient-mode)
   (defun markdown-html (buffer)
-    (princ (with-current-buffer buffer
-	     (format "<!DOCTYPE html><html><title>Impatient Markdown</title><xmp theme=\"united\" style=\"display:none;\"> %s  </xmp><script src=\"http://strapdownjs.com/v/0.2/strapdown.js\"></script></html>" (buffer-substring-no-properties (point-min) (point-max))))
-	   (current-buffer))))
-
-
+    (princ
+     (with-current-buffer buffer
+       (format "<!DOCTYPE html><html><title>Impatient Markdown</title>\
+<xmp theme=\"united\" style=\"display:none;\"> %s  </xmp>\
+<script src=\"http://strapdownjs.com/v/0.2/strapdown.js\"></script></html>"
+	       (buffer-substring-no-properties (point-min) (point-max))))
+     (current-buffer))))
 
 (progn
   (require 'expand-region)
@@ -178,7 +180,6 @@
   (setq avy-orders-alist '((avy-goto-word-0 . avy-order-closest)))
   (setq avy-all-windows nil)
   (global-set-key (kbd "M-RET") 'avy-goto-word-0))
-
 
 (defun open-my-init-file ()
   "Open the init file."
@@ -294,7 +295,9 @@ the beginning of the line"
   (require 'highlight-function-calls)
   (add-hook 'emacs-lisp-mode-hook 'highlight-function-calls-mode))
 
+;; ===================================================================
 ;; Load custom file
+;; Should be at the end
 (progn
   (setq-default custom-file (expand-file-name "custom.el" user-emacs-directory))
   (when (file-exists-p custom-file)
