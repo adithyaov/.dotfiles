@@ -6,8 +6,17 @@
 (blink-cursor-mode 1)
 (global-hl-line-mode 1)
 
+;; Display time
+(display-time-mode 1)
+
+;; Conservative scrolling
+(setq scroll-preserve-screen-position 'always)
+
 ;; Ignore ding
 (setq ring-bell-function 'ignore)
+
+;; Set scratch default text to ""
+(setq initial-scratch-message "")
 
 ;; Onsave hook, remove spaces
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
@@ -15,7 +24,8 @@
 ;; Bootstrap straight.el
 (defvar bootstrap-version)
 (let ((bootstrap-file
-       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+       (expand-file-name "straight/repos/straight.el/bootstrap.el"
+			 user-emacs-directory))
       (bootstrap-version 5))
   (unless (file-exists-p bootstrap-file)
     (with-current-buffer
@@ -74,7 +84,6 @@
 (straight-use-package 'highlight-indent-guides)
 (straight-use-package 'solarized-theme)
 (straight-use-package 'impatient-mode)
-(straight-use-package 'expand-region)
 (straight-use-package 'ivy)
 (straight-use-package 'swiper)
 (straight-use-package 'counsel)
@@ -83,12 +92,24 @@
 (straight-use-package 'hindent)
 (straight-use-package 'projectile)
 (straight-use-package 'counsel-projectile)
-(straight-use-package 'org)
 (straight-use-package 'multiple-cursors)
 (straight-use-package 'avy)
 (straight-use-package 'hydra)
 (straight-use-package 'rust-mode)
 (straight-use-package 'highlight-function-calls)
+(straight-use-package 'org-tree-slide)
+(straight-use-package 'org)
+(straight-use-package 'expand-region)
+(straight-use-package
+ '(ox-reveal :type git :host github :repo "yjwen/Org-Reveal"))
+(straight-use-package 'ivy-posframe)
+(straight-use-package 's)
+
+(require 'ox-reveal)
+
+(progn
+  (require 'org)
+  (define-key org-mode-map (kbd "<C-return>") 'er/expand-region))
 
 ;; Hilight text that extends beyond a certain column
 (progn
@@ -133,7 +154,6 @@
 (progn
   (require 'ivy)
   (require 'counsel)
-  (require 'swiper)
   (ivy-mode 1)
   (setq ivy-use-virtual-buffers t)
   (setq ivy-count-format "(%d/%d) ")
@@ -159,7 +179,6 @@
   (require 'projectile)
   (require 'ivy)
   (require 'counsel)
-  (require 'swiper)
   (require 'counsel-projectile)
   (projectile-mode +1)
   (counsel-projectile-mode 1)
@@ -195,10 +214,9 @@ the beginning of the line"
   (interactive)
 
   (let ((orig-point (point)))
-    (if (= orig-point (point-at-bol))
-      (back-to-indentation)
-      (progn (when (= orig-point (point))
-	       (move-beginning-of-line 1))))))
+    (back-to-indentation)
+    (if (= orig-point (point))
+	(move-beginning-of-line 1))))
 
 ; Bind C-a to smarter-move-point
 (global-set-key (kbd "C-a") 'smarter-move-point)
@@ -290,6 +308,10 @@ the beginning of the line"
     (projectile-with-default-dir (projectile-project-root)
       (compile full-cmd))))
 
+(defun cc-streamly ()
+  (interactive)
+  (cabalcc "streamly"))
+
 ;; Highlight emacs function calls
 (progn
   (require 'highlight-function-calls)
@@ -302,3 +324,61 @@ the beginning of the line"
   (setq-default custom-file (expand-file-name "custom.el" user-emacs-directory))
   (when (file-exists-p custom-file)
     (load custom-file)))
+
+;; Cool ivy completion, Copied from StackOverflow and modified accordingly
+(progn
+
+  (require 's)
+  (require 'ivy)
+
+  ;; Is there a better way to get the expansions?
+  (defun ivy-complete ()
+    (interactive)
+    (dabbrev--reset-global-variables)
+    (let* ((sym (thing-at-point 'symbol :no-properties))
+	   (wor (thing-at-point 'word :no-properties))
+	   (candidates-sym (dabbrev--find-all-expansions sym t))
+	   (candidates-wor
+	    (if (s-equals? sym wor)
+		nil
+	      (progn
+		(dabbrev--reset-global-variables)
+		(dabbrev--find-all-expansions wor t))))
+	   (bounds-sym (bounds-of-thing-at-point 'symbol))
+	   (bounds-wor (bounds-of-thing-at-point 'word))
+	   (candidates (append candidates-sym candidates-wor)))
+      (when (not (null candidates))
+	(let* ((found-match (ivy-read "matches " candidates
+				      :preselect (thing-at-point 'word)
+				      :sort nil
+				      :initial-input wor))
+	       (bounds (if (s-prefix? wor found-match) bounds-wor bounds-sym)))
+	  (progn (delete-region (car bounds) (cdr bounds))
+		 (insert found-match))))))
+
+  (global-set-key (kbd "M-/") 'ivy-complete))
+
+;; posframe is cool
+; (defun ivy-display-function-window (text)
+;   (let ((buffer (get-buffer-create "*ivy-candidate-window*"))
+;         (str (with-current-buffer (get-buffer-create " *Minibuf-1*")
+;                (let ((point (point))
+;                      (string (concat (buffer-string) "  " text)))
+;                  (add-text-properties (- point 1) point '(face cursor) string) ; This does not work?
+;                  string))))
+;     (with-current-buffer buffer
+;       (let ((inhibit-read-only t))
+;         (erase-buffer)
+;         (insert str)))
+;     (with-ivy-window
+;       (display-buffer
+;        buffer
+;        `((display-buffer-reuse-window
+;           display-buffer-below-selected)
+;          (window-height . ,(ivy--height (ivy-state-caller ivy-last))))))))
+; (progn
+;   (require 'ivy-posframe)
+;   (setq ivy-posframe-display-functions-alist
+; 	'((ivy-complete    . ivy-display-function-window)
+; 	  (t               . ivy-display-function-window)))
+;   (ivy-posframe-mode 1))
