@@ -102,7 +102,6 @@
 (straight-use-package 'expand-region)
 (straight-use-package
  '(ox-reveal :type git :host github :repo "yjwen/Org-Reveal"))
-(straight-use-package 'ivy-posframe)
 (straight-use-package 's)
 
 (require 'ox-reveal)
@@ -357,28 +356,3 @@ the beginning of the line"
 		 (insert found-match))))))
 
   (global-set-key (kbd "M-/") 'ivy-complete))
-
-;; posframe is cool
-; (defun ivy-display-function-window (text)
-;   (let ((buffer (get-buffer-create "*ivy-candidate-window*"))
-;         (str (with-current-buffer (get-buffer-create " *Minibuf-1*")
-;                (let ((point (point))
-;                      (string (concat (buffer-string) "  " text)))
-;                  (add-text-properties (- point 1) point '(face cursor) string) ; This does not work?
-;                  string))))
-;     (with-current-buffer buffer
-;       (let ((inhibit-read-only t))
-;         (erase-buffer)
-;         (insert str)))
-;     (with-ivy-window
-;       (display-buffer
-;        buffer
-;        `((display-buffer-reuse-window
-;           display-buffer-below-selected)
-;          (window-height . ,(ivy--height (ivy-state-caller ivy-last))))))))
-; (progn
-;   (require 'ivy-posframe)
-;   (setq ivy-posframe-display-functions-alist
-; 	'((ivy-complete    . ivy-display-function-window)
-; 	  (t               . ivy-display-function-window)))
-;   (ivy-posframe-mode 1))
