@@ -103,6 +103,20 @@
 (straight-use-package
  '(ox-reveal :type git :host github :repo "yjwen/Org-Reveal"))
 (straight-use-package 's)
+(straight-use-package 'company)
+(straight-use-package 'company-fuzzy)
+
+(progn
+  (require 'company)
+  (require 'company-fuzzy)
+  (setq company-require-match nil)
+  (setq company-tooltip-align-annotations t)
+  (setq company-eclim-auto-save nil)
+  (setq company-dabbrev-downcase nil)
+  (add-hook 'after-init-hook 'global-company-mode)
+  (global-set-key (kbd "M-/") 'company-dabbrev)
+  (global-company-fuzzy-mode 1)
+  (setq company-fuzzy-prefix-ontop t))
 
 (require 'ox-reveal)
 
@@ -167,12 +181,57 @@
   (require 'haskell-mode)
   (setq haskell-tags-on-save nil)
   (setq tags-revert-without-query t)
-  (setq haskell-indentation-mode nil)
+  (add-hook 'haskell-mode-hook 'turn-on-haskell-indent)
   (setq haskell-compile-cabal-build-command "cabal v2-build"))
+
 
 (progn
   (require 'hindent)
   (add-hook 'haskell-mode-hook #'hindent-mode))
+
+;; =================================================================
+;; Try to work with both, hindent and CPP
+
+(progn
+  (require 'hindent)
+  (setq alist-haskell-cpp
+	'(("INLINE_LATE" . "INLINE [0]")
+	  ("INLINE_NORMAL" . "INLINE [1]")
+	  ("INLINE_EARLY" . "INLINE [2]")))
+  (defun haskell-desugar-cpp-decl (assoc-arr)
+    (interactive)
+    (let ((start-end (hindent-decl-points)))
+      (when start-end
+	(let ((beg (car start-end))
+	      (end (cdr start-end)))
+	  (dolist (elem assoc-arr)
+	    (replace-string (car elem) (cdr elem) nil beg end))))))
+  (defun haskell-sugar-cpp-decl (assoc-arr)
+    (interactive)
+    (let ((start-end (hindent-decl-points)))
+      (when start-end
+	(let ((beg (car start-end))
+	      (end (cdr start-end)))
+	  (dolist (elem assoc-arr)
+	    (replace-string (cdr elem) (car elem) nil beg end))))))
+  (defun hindent-reformat-decl-cpp (&optional assoc-arr)
+    (interactive)
+    (progn
+      (unless assoc-arr (setq assoc-arr alist-haskell-cpp))
+      (haskell-desugar-cpp-decl assoc-arr)
+      (hindent-reformat-decl)
+      (haskell-sugar-cpp-decl assoc-arr)))
+  (defun hindent-reformat-decl-or-fill-cpp (justify)
+    (interactive (progn
+		   (barf-if-buffer-read-only)
+		   (list (if current-prefix-arg 'full))))
+    (if (hindent-in-comment)
+	(fill-paragraph justify t)
+      (hindent-reformat-decl-cpp)))
+  (define-key hindent-mode-map
+    [remap fill-paragraph] #'hindent-reformat-decl-or-fill-cpp))
+
+;; =================================================================
 
 (progn
   (require 'projectile)
@@ -316,6 +375,7 @@ the beginning of the line"
   (require 'highlight-function-calls)
   (add-hook 'emacs-lisp-mode-hook 'highlight-function-calls-mode))
 
+
 ;; ===================================================================
 ;; Load custom file
 ;; Should be at the end
@@ -347,12 +407,10 @@ the beginning of the line"
 	   (bounds-wor (bounds-of-thing-at-point 'word))
 	   (candidates (append candidates-sym candidates-wor)))
       (when (not (null candidates))
-	(let* ((found-match (ivy-read "matches " candidates
+	(let* ((found-match (ivy-read "matches: " candidates
 				      :preselect (thing-at-point 'word)
-				      :sort nil
-				      :initial-input wor))
+				      :sort t
+				      :initial-input (concat wor " ")))
 	       (bounds (if (s-prefix? wor found-match) bounds-wor bounds-sym)))
 	  (progn (delete-region (car bounds) (cdr bounds))
-		 (insert found-match))))))
-
-  (global-set-key (kbd "M-/") 'ivy-complete))
+		 (insert found-match)))))))
