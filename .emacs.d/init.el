@@ -36,6 +36,10 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
+;; Disable C-v. I tend to press it a lot.
+(global-unset-key (kbd "C-v"))
+(global-set-key (kbd "C-v") 'scroll-up)
+
 ;; scroll one line at a time (less "jumpy" than defaults)
 (setq mouse-wheel-scroll-amount '(1 ((shift) . 1))) ;; one line at a time
 (setq mouse-wheel-progressive-speed nil) ;; don't accelerate scrolling
@@ -107,24 +111,40 @@
  '(ox-reveal :type git :host github :repo "yjwen/Org-Reveal"))
 (straight-use-package 's)
 (straight-use-package 'dash)
-(straight-use-package 'company)
-(straight-use-package 'company-fuzzy)
+; (straight-use-package 'company)
+; (straight-use-package 'company-fuzzy)
 (straight-use-package 'forge)
+(straight-use-package 'doom-themes)
+(straight-use-package 'ivy-posframe)
+(straight-use-package 'doom-modeline)
+
+(progn
+  (require 'doom-modeline)
+  (doom-modeline-mode 1))
 
 (require 'forge)
 
 (progn
-  (require 'company)
-  (require 'company-fuzzy)
-  (setq company-require-match nil)
-  (setq company-tooltip-align-annotations t)
-  (setq company-eclim-auto-save nil)
-  (setq company-dabbrev-downcase nil)
-  (add-hook 'after-init-hook 'global-company-mode)
-  (global-set-key (kbd "M-/") 'company-complete)
-  (global-company-fuzzy-mode 1)
-  (setq company-idle-delay nil)
-  (setq company-fuzzy-prefix-ontop t))
+  (require 'ivy-posframe)
+  (setq ivy-posframe-display-functions-alist
+	'((ivy-complete . ivy-posframe-display-at-point)))
+  (setq ivy-posframe-parameters
+      '((left-fringe . 8)
+        (right-fringe . 8)))
+  (ivy-posframe-mode 1))
+
+; (progn
+;   (require 'company)
+;   (require 'company-fuzzy)
+;   (setq company-require-match nil)
+;   (setq company-tooltip-align-annotations t)
+;   (setq company-eclim-auto-save nil)
+;   (setq company-dabbrev-downcase nil)
+;   (add-hook 'after-init-hook 'global-company-mode)
+;   (global-set-key (kbd "M-/") 'company-complete)
+;   (global-company-fuzzy-mode 1)
+;   (setq company-idle-delay nil)
+;   (setq company-fuzzy-prefix-ontop t))
 
 (require 'ox-reveal)
 
@@ -150,8 +170,8 @@
 
 ;; Load theme
 (progn
-  (require 'solarized-theme)
-  (load-theme 'solarized-light t))
+  (require 'doom-themes)
+  (load-theme 'doom-city-lights t))
 
 ;; Look at markdown in a clean format
 (progn
@@ -235,9 +255,14 @@
 		   (list (if current-prefix-arg 'full))))
     (if (hindent-in-comment)
 	(fill-paragraph justify t)
-      (hindent-reformat-decl-cpp)))
+      (progn
+	  (setq move-point (point))
+	  (hindent-reformat-decl-cpp)
+	  (goto-char move-point))))
   (define-key hindent-mode-map
     [remap fill-paragraph] #'hindent-reformat-decl-or-fill-cpp))
+
+
 
 ;; =================================================================
 
@@ -260,7 +285,7 @@
 
 (progn
   (require 'avy)
-  (setq avy-keys '(?a ?s ?d ?f ?q ?w ?e ?r ?b ?n ?m ?j ?k ?l ?o ?p))
+  (setq avy-keys '(?a ?s ?d ?f ?q ?w ?e ?r ?n ?m ?j ?k ?l ?o ?p))
   (setq avy-background t)
   (setq avy-orders-alist '((avy-goto-word-0 . avy-order-closest)
 			   (avy-goto-word-1 . avy-order-closest)))
@@ -406,25 +431,17 @@ the beginning of the line"
     (interactive)
     (dabbrev--reset-global-variables)
     (let* ((sym (thing-at-point 'symbol :no-properties))
-	   (wor (thing-at-point 'word :no-properties))
-	   (candidates-sym (dabbrev--find-all-expansions sym t))
-	   (candidates-wor
-	    (if (s-equals? sym wor)
-		nil
-	      (progn
-		(dabbrev--reset-global-variables)
-		(dabbrev--find-all-expansions wor t))))
-	   (bounds-sym (bounds-of-thing-at-point 'symbol))
-	   (bounds-wor (bounds-of-thing-at-point 'word))
-	   (candidates (append candidates-sym candidates-wor)))
+	   (candidates (dabbrev--find-all-expansions sym t))
+	   (bounds (bounds-of-thing-at-point 'symbol)))
       (when (not (null candidates))
-	(let* ((found-match (ivy-read "matches: " candidates
-				      :preselect (thing-at-point 'word)
+	(let* ((found-match (ivy-read sym candidates
+				      :preselect sym
 				      :sort t
-				      :initial-input (concat wor " ")))
-	       (bounds (if (s-prefix? wor found-match) bounds-wor bounds-sym)))
+				      :initial-input nil)))
 	  (progn (delete-region (car bounds) (cdr bounds))
 		 (insert found-match)))))))
+
+(global-set-key (kbd "M-/") 'ivy-complete)
 
 ;; ===================================================================
 ;; Custom function to delete blank lines & spaces, Thanks ergoemacs!
@@ -500,3 +517,63 @@ Version 2018-04-02T14:38:04-07:00"
           (message "nothing done. logic error 40873. shouldn't reach here" ))))))
 
 (global-set-key (kbd "M-d") 'xah-shrink-whitespaces)
+
+;; Goto matching paren
+(defun match-paren (arg)
+  "Go to the matching paren if on a paren; otherwise insert %."
+  (interactive "p")
+  (cond ((looking-at "\\s(") (forward-list 1) (backward-char 1))
+	((looking-at "\\s)") (forward-char 1) (backward-list 1))
+	(t (self-insert-command (or arg 1)))))
+
+(global-set-key "%" 'match-paren)
+
+;; Org mode work flow - Kanban style
+
+(setq org-todo-keywords
+      '((sequence "TODO" "DOING" "BLOCKED" "REVIEW" "|" "DONE" "ARCHIVED")))
+
+;; Setting Colours (faces) for todo states to give clearer view of work
+(setq org-todo-keyword-faces
+  '(("TODO" . org-warning)
+   ("DOING" . "yellow")
+   ("BLOCKED" . "red")
+   ("REVIEW" . "orange")
+   ("DONE" . "green")
+   ("ARCHIVED" .  "blue")))
+
+(setq tasks-file "~/org/tasks.org")
+
+(setq org-capture-templates
+      '(("t" "Todo" entry
+	 (file+headline tasks-file "Tasks")
+	 "* TODO %?\n %i\n %a")
+	("j" "Journal" entry
+	 (file+olp+datetree "~/org/journal.org")
+	 "* %?\nEntered on %U\n  %i\n  %a")))
+f
+(global-set-key (kbd "C-c c") 'org-capture)
+
+(defun tasks ()
+  "Open the init file."
+  (interactive)
+  (find-file tasks-file))
+
+
+;; Scroll by min(Paragraph, Half screen)
+
+(defun is-empty-line ()
+  "Check if the current line is empty"
+  (if (eq (line-beginning-position) (line-end-position)) t))
+
+(defun go-till-empty-line (arg)
+  "Go to current position + till. If a newline if found, stop"
+  (or arg (setq arg 50))
+  (setq avg-num-line-chars (* arg 45))
+  (if (> arg 0)
+      (re-search-forward "^\n" (+ (point) avg-num-line-chars) 'end))
+  (if (< arg 0)
+      (re-search-backward "^\n" (+ (point) avg-num-line-chars) 'end)))
+
+(global-set-key (kbd "M-n") (lambda () (interactive) (go-till-empty-line 20)))
+(global-set-key (kbd "M-p") (lambda () (interactive) (go-till-empty-line -20)))
