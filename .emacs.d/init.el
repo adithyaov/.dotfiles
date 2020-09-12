@@ -135,8 +135,6 @@
 ;   (setq lsp-session-file "/mnt/c/Users/mota/Desktop/LinuxWorkStation/Prog/streamly-unicode/session.lsp")
 ;   (add-hook 'haskell-mode-hook #'lsp))
 
-(require 'ghcid)
-
 (progn
   (require 'doom-modeline)
   (doom-modeline-mode 1))
