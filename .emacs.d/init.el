@@ -83,6 +83,9 @@
 ;; Set column length to 80
 (setq-default fill-column 80)
 
+;; Custom elisp files
+(add-to-list 'load-path "~/.emacs.d/elisp/")
+
 ;; Imports
 (straight-use-package 'ahk-mode)
 (straight-use-package 'column-enforce-mode)
@@ -117,6 +120,22 @@
 (straight-use-package 'doom-themes)
 (straight-use-package 'ivy-posframe)
 (straight-use-package 'doom-modeline)
+
+;; I cant seem to get lsp to work properly
+; (straight-use-package 'lsp-mode)
+; (straight-use-package 'lsp-ui)
+; (straight-use-package 'lsp-haskell)
+; (straight-use-package 'lsp-ivy)
+;
+; (progn
+;   (require 'lsp)
+;   (require 'lsp-ui)
+;   (require 'lsp-haskell)
+;   (setq lsp-haskell-process-path-hie "hie-wrapper")
+;   (setq lsp-session-file "/mnt/c/Users/mota/Desktop/LinuxWorkStation/Prog/streamly-unicode/session.lsp")
+;   (add-hook 'haskell-mode-hook #'lsp))
+
+(require 'ghcid)
 
 (progn
   (require 'doom-modeline)
@@ -551,7 +570,7 @@ Version 2018-04-02T14:38:04-07:00"
 	("j" "Journal" entry
 	 (file+olp+datetree "~/org/journal.org")
 	 "* %?\nEntered on %U\n  %i\n  %a")))
-f
+
 (global-set-key (kbd "C-c c") 'org-capture)
 
 (defun tasks ()
