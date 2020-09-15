@@ -81,9 +81,15 @@ recognize the new height until you manually restart it by calling
 (defun ghcid-stack-cmd (target)
   (format "stack ghci %s --test --bench --ghci-options=-fno-code" target))
 
+(defun ghcid-cabal-cmd (target)
+  (format "cabal repl " target))
+
 ;; TODO Pass in compilation command like compilation-mode
 (defun ghcid-command (h)
     (format "ghcid -c \"%s\" -h %s\n" (ghcid-stack-cmd ghcid-target) h))
+
+(defun ghcid-command-cabal (h)
+    (format "ghcid -l -c \"%s\" -h %s\n" (ghcid-cabal-cmd ghcid-target) h))
 
 (defun ghcid-get-buffer ()
   "Create or reuse a ghcid buffer with the configured name and
@@ -116,7 +122,7 @@ exactly. See `ghcid-mode'."
            ghcid-process-name
            "/bin/bash"
            nil
-           (list "-c" (ghcid-command height)))
+           (list "-c" (ghcid-command-cabal height)))
 
       )))
 
@@ -136,7 +142,7 @@ exactly. See `ghcid-mode'."
 The process will be started in the directory of the buffer where
 you ran this command from."
   (interactive)
-  (ghcid-start default-directory))
+  (ghcid-start (projectile-project-root)))
 
 ;; Assumes that only one window is open
 (defun ghcid-stop ()
