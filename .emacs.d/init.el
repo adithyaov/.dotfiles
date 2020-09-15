@@ -6,6 +6,9 @@
 (blink-cursor-mode 1)
 (global-hl-line-mode 1)
 
+;; Prompt before kill
+(setq confirm-kill-emacs 'yes-or-no-p)
+
 ;; Display time
 (display-time-mode 1)
 
@@ -144,7 +147,8 @@
 (progn
   (require 'ivy-posframe)
   (setq ivy-posframe-display-functions-alist
-	'((ivy-complete . ivy-posframe-display-at-point)))
+	'((ivy-complete . ivy-posframe-display-at-point)
+	  (counsel-esh-history . ivy-posframe-display-at-point)))
   (setq ivy-posframe-parameters
       '((left-fringe . 8)
         (right-fringe . 8)))
@@ -216,7 +220,10 @@
   (setq ivy-use-virtual-buffers t)
   (setq ivy-count-format "(%d/%d) ")
   (global-set-key (kbd "C-x C-f") 'counsel-find-file)
-  (global-set-key (kbd "C-c g") 'counsel-git))
+  (global-set-key (kbd "C-c g") 'counsel-git)
+  (add-hook
+   'eshell-mode-hook
+   (lambda () (define-key eshell-mode-map (kbd "M-r") 'counsel-esh-history))))
 
 (progn
   (require 'magit)
@@ -419,7 +426,8 @@ the beginning of the line"
 
 (defun ccmain ()
   (interactive)
-  (cabalcc (-last 's-present? (s-split "/" (projectile-project-root)))))
+  (concat "lib:"
+	  (cabalcc (-last 's-present? (s-split "/" (projectile-project-root))))))
 
 (define-key haskell-mode-map (kbd "C-c C-c") 'ccmain)
 
@@ -594,3 +602,39 @@ Version 2018-04-02T14:38:04-07:00"
 
 (global-set-key (kbd "M-n") (lambda () (interactive) (go-till-empty-line 20)))
 (global-set-key (kbd "M-p") (lambda () (interactive) (go-till-empty-line -20)))
+
+
+;; GHCID
+
+(require 'projectile)
+(require 'ghcid)
+
+(defun set-default-target ()
+  "Set a default ghcid-target"
+  (setq ghcid-target
+	(concat "lib:"
+		(-last 's-present? (s-split "/" (projectile-project-root))))))
+
+(defun ghcid-projectile ()
+  "Start a ghcid process in a new window. Kills any existing sessions.
+
+The process will be started in the directory of the buffer where
+you ran this command from."
+  (interactive)
+  (set-default-target)
+  (ghcid-start (projectile-project-root)))
+
+;; Lisp coding stype
+(setq indent-tabs-mode nil)
+
+(require 'cl-indent)
+(setq lisp-indent-function #'common-lisp-indent-function)
+(put 'if 'common-lisp-indent-function 2)
+(put 'defface 'common-lisp-indent-function 1)
+(put 'defalias 'common-lisp-indent-function 1)
+(put 'define-minor-mode 'common-lisp-indent-function 1)
+(put 'define-derived-mode 'common-lisp-indent-function 3)
+(put 'cl-flet 'common-lisp-indent-function
+     (get 'flet 'common-lisp-indent-function))
+(put 'cl-labels 'common-lisp-indent-function
+     (get 'labels 'common-lisp-indent-function))
