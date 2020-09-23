@@ -413,6 +413,8 @@ the beginning of the line"
 
 ;; ===================================================================
 ;; cabal check open-repl/close
+(defvar cabalcc-target)
+
 (defun cabalcc (main &rest args)
   (interactive "srepl: ")
   (let* ((cmd (lambda (x) (concat "(echo :q | cabal repl " x  ")" )))
@@ -424,12 +426,15 @@ the beginning of the line"
     (projectile-with-default-dir (projectile-project-root)
       (compile full-cmd))))
 
-(defun ccmain ()
-  (interactive)
-  (concat "lib:"
-	  (cabalcc (-last 's-present? (s-split "/" (projectile-project-root))))))
+(defun set-cabalcc-target (target)
+  (interactive "starget: ")
+  (setq cabalcc-target target))
 
-(define-key haskell-mode-map (kbd "C-c C-c") 'ccmain)
+(defun cabalcc-target ()
+  (interactive)
+  (cabalcc cabalcc-target))
+
+(define-key haskell-mode-map (kbd "C-c C-c") 'cabalcc-target)
 
 ;; Highlight emacs function calls
 (progn
